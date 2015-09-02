@@ -1,3 +1,0 @@
-# spedish
-
-First bit..
