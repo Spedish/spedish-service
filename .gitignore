@@ -1,3 +1,8 @@
+# ==== Custom to this project ====
+# ignore the dumped django_db from script
+django_db
+
+# ==== Github recommended Python project ignore ====
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
