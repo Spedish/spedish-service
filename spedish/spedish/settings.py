@@ -119,3 +119,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '%s/static/' % BASE_DIR
+
+# Import local setting overrides if any
+try:
+    from local_settings import *
+except ImportError:
+    pass
+
