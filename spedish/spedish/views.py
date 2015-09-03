@@ -24,12 +24,40 @@ class UserAuth(viewsets.ViewSet):
     queryset = User.objects.none()
     serializer_class = UserSerializer
 
+    def create(self, request, format=None, pk=None):
+        """
+        Login the indicated user
+        ---
+        request_serializer: UserSerializer
+        response_serializer: UserSerializer
+        responseMessages:
+            - code: 200
+              message: Successfully logged in
+            - code: 401
+              message: Login failed
+        """
+        try:
+            username = request.POST['username']
+            password = request.POST['password']
+
+            return Response(None, 200)
+        except Exception as e:
+            return Response(None, 401)
+
+
     def list(self, request, format=None):
         """
         Returns whether the user is logged in or not
-
-        Results is response status code
+        ---
+        responseMessages:
+            - code: 200
+              message: User currently logged in
+            - code: 403
+              message: User currently not logged in
         """
+        model = User
+        request_serializer = UserSerializer
+        serializer_class = UserSerializer
         if request.user.is_authenticated():
             return Response(None, 200)
         else:
@@ -38,9 +66,14 @@ class UserAuth(viewsets.ViewSet):
     def destroy(self, request, format=None, pk=None):
         """
         Logout the current user, will accept any pk token for now
-
-        Always return 200
+        ---
+        responseMessages:
+            - code: 200
+              message: Always returns this status
         """
-        logout(request)
+        request_serializer = UserSerializer
+        serializer_class = UserSerializer
+
+        #logout(request)
 
         return Response(None, 200)
