@@ -26,6 +26,7 @@ from spedish import views
 REST API Endpoints
 """
 router.register(r'users', views.UserViewSet)
+router.register(r'auth', views.UserAuth)
 
 urlpatterns = [
     url(r'^', include(router.urls)),    # Hook up the APIs
