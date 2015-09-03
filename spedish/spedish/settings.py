@@ -122,7 +122,8 @@ STATIC_ROOT = '%s/static/' % BASE_DIR
 
 # Import local setting overrides if any
 try:
-    from local_settings import *
-except ImportError:
+    from spedish.local_settings import *
+except ImportError as e:
+    print("Did not find local settings, default will be used:", e)
     pass
 
