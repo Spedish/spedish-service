@@ -1,9 +1,9 @@
-from django.contrib.auth import logout
+from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.models import User, Group
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-
+from rest_framework.decorators import detail_route
 from spedish.serializers import UserSerializer
 
 
@@ -33,11 +33,7 @@ class UserAuth(viewsets.ViewSet):
         - name: body
           pytype: UserSerializer
           paramType: body
-        - name: idInPath
-          paramType: path
-        - name: idInForm
-          pytype: UserSerializer
-          paramType: form
+
         responseMessages:
             - code: 200
               message: Successfully logged in
@@ -50,24 +46,29 @@ class UserAuth(viewsets.ViewSet):
             username = inputSerializer.data.get('username')
             password = inputSerializer.data.get('password')
 
-            return Response(None, 200)
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return Response(None, 200)
+                else:
+                    return Response(None, 401)
+            return Response(None, 401)
         except Exception as e:
             return Response(None, 401)
 
     def list(self, request, format=None):
+
         """
-        Returns whether the user is logged in or not
+        Check if current user is logged in
         ---
         responseMessages:
             - code: 200
-              message: User currently logged in
-            - code: 403
-              message: User currently not logged in
+              message: User is logged in
+            - code: 401
+              message: User is not logged in
         """
-        model = User
-        request_serializer = UserSerializer
-        serializer_class = UserSerializer
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             return Response(None, 200)
         else:
             return Response(None, 401)
@@ -80,9 +81,5 @@ class UserAuth(viewsets.ViewSet):
             - code: 200
               message: Always returns this status
         """
-        request_serializer = UserSerializer
-        serializer_class = UserSerializer
-
-        #logout(request)
-
+        logout(request)
         return Response(None, 200)
