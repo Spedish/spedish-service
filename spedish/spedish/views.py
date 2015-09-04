@@ -54,7 +54,6 @@ class UserAuth(viewsets.ViewSet):
         except Exception as e:
             return Response(None, 401)
 
-
     def list(self, request, format=None):
         """
         Returns whether the user is logged in or not
