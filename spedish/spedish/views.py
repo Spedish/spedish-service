@@ -47,13 +47,12 @@ class UserAuth(viewsets.ViewSet):
             password = inputSerializer.data.get('password')
 
             user = authenticate(username=username, password=password)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return Response(None, 200)
-                else:
-                    return Response(None, 401)
+            if user is not None and user.is_active:
+                login(request, user)
+                return Response(None, 200)
+        
             return Response(None, 401)
+        
         except Exception as e:
             return Response(None, 401)
 
@@ -68,7 +67,7 @@ class UserAuth(viewsets.ViewSet):
             - code: 401
               message: User is not logged in
         """
-        if request.user.is_authenticated:
+        if request.user.is_authenticated():
             return Response(None, 200)
         else:
             return Response(None, 401)

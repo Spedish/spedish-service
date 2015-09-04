@@ -77,12 +77,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'spedish.wsgi.application'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
     'PAGE_SIZE': 10
-}
-
-SWAGGER_SETTINGS = {
-    'is_superuser': True,
 }
 
 # Database
