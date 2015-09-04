@@ -28,8 +28,16 @@ class UserAuth(viewsets.ViewSet):
         """
         Login the indicated user
         ---
-        request_serializer: UserSerializer
         response_serializer: UserSerializer
+        parameters:
+        - name: body
+          pytype: UserSerializer
+          paramType: body
+        - name: idInPath
+          paramType: path
+        - name: idInForm
+          pytype: UserSerializer
+          paramType: form
         responseMessages:
             - code: 200
               message: Successfully logged in
@@ -37,8 +45,9 @@ class UserAuth(viewsets.ViewSet):
               message: Login failed
         """
         try:
-            username = request.POST['username']
-            password = request.POST['password']
+            inputSerializer = UserSerializer(data=request.DATA)
+            username = inputSerializer.data['username']
+            password = inputSerializer.data['password']
 
             return Response(None, 200)
         except Exception as e:
