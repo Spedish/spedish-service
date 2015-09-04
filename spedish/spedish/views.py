@@ -45,9 +45,10 @@ class UserAuth(viewsets.ViewSet):
               message: Login failed
         """
         try:
-            inputSerializer = UserSerializer(data=request.DATA)
-            username = inputSerializer.data['username']
-            password = inputSerializer.data['password']
+            inputSerializer = UserSerializer(data=request.data)
+            inputSerializer.is_valid()
+            username = inputSerializer.data.get('username')
+            password = inputSerializer.data.get('password')
 
             return Response(None, 200)
         except Exception as e:
