@@ -1,9 +1,9 @@
 from django.contrib.auth import logout, authenticate, login
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route
 from spedish.serializers import UserSerializer
 
 
@@ -14,17 +14,12 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
 
-class UserAuth(viewsets.ViewSet):
+class UserAuth(APIView):
     """
-    This end point provides basic user control
+    This end point provides basic user authentication functionality
     """
 
-    # We are not expecting to query a model and we do not need
-    # to return data (only status code)
-    queryset = User.objects.none()
-    serializer_class = UserSerializer
-
-    def create(self, request, format=None, pk=None):
+    def post(self, request):
         """
         Login the indicated user
         ---
@@ -37,29 +32,35 @@ class UserAuth(viewsets.ViewSet):
         responseMessages:
             - code: 200
               message: Successfully logged in
+            - code: 400
+              message: Invalid request data
             - code: 401
               message: Login failed
         """
         try:
             inputSerializer = UserSerializer(data=request.data)
-            inputSerializer.is_valid()
-            username = inputSerializer.data.get('username')
-            password = inputSerializer.data.get('password')
+            
+            if inputSerializer.is_valid():
+                username = inputSerializer.data.get('username')
+                password = inputSerializer.data.get('password')
 
-            user = authenticate(username=username, password=password)
-            if user is not None and user.is_active:
-                login(request, user)
-                return Response(None, 200)
+                user = authenticate(username=username, password=password)
+                if user is not None and user.is_active:
+                    login(request, user)
+                    return Response(None, status.HTTP_200_OK)
+                
+                return Response(None, status.HTTP_401_UNAUTHORIZED)
+            
+            else:
+                return Response(None, status.HTTP_400_BAD_REQUEST)
         
-            return Response(None, 401)
-        
-        except Exception as e:
+        except:
             return Response(None, 401)
 
-    def list(self, request, format=None):
+    def get(self, request):
 
         """
-        Check if current user is logged in
+        Check if the requester is logged in
         ---
         responseMessages:
             - code: 200
@@ -72,9 +73,9 @@ class UserAuth(viewsets.ViewSet):
         else:
             return Response(None, 401)
 
-    def destroy(self, request, format=None, pk=None):
+    def delete(self, request):
         """
-        Logout the current user, will accept any pk token for now
+        Logout the current user
         ---
         responseMessages:
             - code: 200
