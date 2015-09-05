@@ -15,23 +15,21 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.views.generic import TemplateView
 
 from rest_framework import routers
 router = routers.DefaultRouter()
 
 from spedish import views
 
-"""
-REST API Endpoints
-"""
-router.register(r'users', views.UserViewSet)
 
 urlpatterns = [
-    url(r'^', include(router.urls)),    # Hook up the APIs
-    url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^$', TemplateView.as_view(template_name='index.html'), name="home"),
-    url(r'^docs/', include('rest_framework_swagger.urls')),
+    url(r'^grappelli/', include('grappelli.urls')),                                 # grappelli URLS
+    url(r'^admin/', include(admin.site.urls)),                                      # django admin web portal
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')), # Rest framework internal URLs
+    url(r'^docs/', include('rest_framework_swagger.urls')),                         # Swagger
+    
+    # API end points
+    url(r'^', include(router.urls)),                                    # Hook up the endpoints from the router
+    url(r'^auth/$', views.UserAuth.as_view(), name='user-auth-api'),
+    url(r'^user-profile/$', views.UserProfileMgr.as_view(), name='user-profile-api'),
 ]
