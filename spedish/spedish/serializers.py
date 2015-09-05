@@ -23,7 +23,7 @@ class UserWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'password', 'first_name', 'last_name', 'email')
-
+        
 
 class UserProfileReadSerializer(serializers.ModelSerializer):
     user = UserReadSerializer(many = False, read_only = True)
@@ -35,7 +35,7 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
         
 class UserProfileWriteSerializer(serializers.ModelSerializer):
     user = UserWriteSerializer(many = False, read_only = False)
-    
+
     class Meta:
         model = UserProfile
         fields = ('user', 'isSeller')
@@ -46,7 +46,7 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
         userData = data.pop('user')
         
         userRec =  User(**userData)
-        userRec.set_password(userData.get('password')) 
+        userRec.set_password(userData.get('password'))
         userRec.save()
         
         userProfileRec = UserProfile(user = userRec, **data)

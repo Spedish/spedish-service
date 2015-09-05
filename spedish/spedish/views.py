@@ -5,14 +5,14 @@ from rest_framework.views import APIView
 
 from spedish.models import UserProfile
 from spedish.serializers import UserProfileWriteSerializer, \
-    UserProfileReadSerializer, UserAuthSerializer
+    UserProfileReadSerializer
 
 
 class UserProfileMgr(APIView):
     """
     User profile management
     """
-    
+
     def post(self, request):
         """
         Create new user profile
@@ -44,7 +44,7 @@ class UserProfileMgr(APIView):
         response_serializer: UserProfileReadSerializer
         parameters:
         - name: username
-          description: retrive profile for a single user
+          description: retrieve profile for a single user
           type: string
           paramType: query
           required: true
