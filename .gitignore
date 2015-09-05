@@ -3,6 +3,11 @@
 django_db
 local_settings.py
 
+# ==== PyDev files ====
+.project
+.pydevproject
+.settings
+
 # ==== Github recommended Python project ignore ====
 # Byte-compiled / optimized / DLL files
 __pycache__/
