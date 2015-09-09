@@ -1,4 +1,6 @@
 from django.contrib.auth import logout, authenticate, login
+from django.core.exceptions import ObjectDoesNotExist
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -23,7 +25,7 @@ class UserProfileMgr(APIView):
           paramType: body
 
         responseMessages:
-            - code: 200
+            - code: 201
               message: Successfully created
             - code: 400
               message: Invalid request data
@@ -32,11 +34,11 @@ class UserProfileMgr(APIView):
             inputSerializer = UserProfileWriteSerializer(data = request.data)
             if inputSerializer.is_valid(raise_exception = True):
                 inputSerializer.save()
-                return Response(None, status.HTTP_200_OK)
-        
-        except Exception as e:
+                return Response(None, status.HTTP_201_CREATED)
+
+        except:
             return Response(None, status.HTTP_400_BAD_REQUEST)
-        
+
     def get(self, request):
         """
         Get user profile(s)
@@ -60,14 +62,16 @@ class UserProfileMgr(APIView):
         try:
             # use the profile serializer to get the username
             username = request.GET['username']
-            
-            profile = UserProfile.objects.get(user__username = username)
-            if not profile:
+
+            try:
+                profile = UserProfile.objects.get(user__username = username)
+
+                return Response(UserProfileReadSerializer(profile).data, status.HTTP_200_OK)
+
+            except ObjectDoesNotExist:
                 return Response(None, status.HTTP_404_NOT_FOUND)
-            
-            return Response(UserProfileReadSerializer(profile).data, status.HTTP_200_OK)
-         
-        except Exception as e:
+
+        except:
             return Response(None, status.HTTP_400_BAD_REQUEST)
 
 
@@ -104,9 +108,9 @@ class UserAuth(APIView):
             if user is not None and user.is_active:
                 login(request, user)
                 return Response(None, status.HTTP_200_OK)
-            
+
             return Response(None, status.HTTP_401_UNAUTHORIZED)
-        
+
         except:
             return Response(None, status.HTTP_400_BAD_REQUEST)
 
