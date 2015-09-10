@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from localflavor.us.models import USStateField, USZipCodeField
 
-
 class Address(models.Model):
     """
     This model holds the user address
@@ -12,6 +11,7 @@ class Address(models.Model):
     city = models.CharField(max_length = 50)
     state = USStateField()
     zip_code = USZipCodeField()
+    user = models.ForeignKey('UserProfile', null = True, blank = True)
 
 
 class UserProfile(models.Model):
@@ -21,7 +21,4 @@ class UserProfile(models.Model):
     # Each profile corresponds to exactly 1 users
     user = models.OneToOneField(User)
     isSeller = models.BooleanField()
-    address = models.OneToOneField(Address, default = '')
-
-
 

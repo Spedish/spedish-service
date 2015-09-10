@@ -33,7 +33,7 @@ class UserWriteSerializer(serializers.ModelSerializer):
 
 class UserProfileReadSerializer(serializers.ModelSerializer):
     user = UserReadSerializer(many = False, read_only = True)
-    address = UserAddressSerializer(many = False, read_only = True)
+    address = UserAddressSerializer(many = True, read_only = True)
 
     class Meta:
         model = UserProfile
@@ -42,7 +42,7 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
 
 class UserProfileWriteSerializer(serializers.ModelSerializer):
     user = UserWriteSerializer(many = False, read_only = False)
-    address = UserAddressSerializer(many = False, read_only = False)
+    address = UserAddressSerializer(many = True, read_only = False)
 
     class Meta:
         model = UserProfile
@@ -58,11 +58,12 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
         userRec.set_password(userData.get('password'))
         userRec.save()
 
-        userAddress = Address(**address)
-        userAddress.save()
-
-        userProfileRec = UserProfile(user = userRec, address = userAddress, **data)
+        userProfileRec = UserProfile(user = userRec, **data)
         userProfileRec.save()
+
+        for item in address:
+            userAddress = Address(user = userProfileRec, **item)
+            userAddress.save()
         
         return userProfileRec
 
