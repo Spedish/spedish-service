@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from localflavor.us.models import USStateField, USZipCodeField
 
+
 class Address(models.Model):
     """
     This model holds the user address
@@ -11,7 +12,7 @@ class Address(models.Model):
     city = models.CharField(max_length = 50)
     state = USStateField()
     zip_code = USZipCodeField()
-    user = models.ForeignKey('UserProfile', null = True, blank = True)
+    user = models.ForeignKey('UserProfile', null = True, blank = True, related_name='address')
 
 
 class UserProfile(models.Model):

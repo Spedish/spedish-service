@@ -11,7 +11,7 @@ import json
 
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.test import SimpleTestCase
 from rest_framework import status
 from rest_framework.test import APITestCase 
 
@@ -32,6 +32,22 @@ class UserAPITests(APITestCase):
                 'email': testEmail,
             },
             'isSeller': True,
+            'address': [
+                {
+                    'line_one': '11731 SE 65th St',
+                    'line_two': '',
+                    'city': 'Bellevue',
+                    'state': 'WA',
+                    'zip_code': '98006'
+                },
+                {
+                    'line_one': '925 Weyburn Pl',
+                    'line_two': '',
+                    'city': 'Los Angeles',
+                    'state': 'CA',
+                    'zip_code': '90024'
+                }
+            ]
     }
     
     isSetup = False
@@ -80,13 +96,12 @@ class UserAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
         # Bad request, user not found
-        #response = c.get(url, data={'username': 'blah'})
         response = self.client.get(url, data={'username': 'blah'})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         
         response = self.client.get(url, data={'username': self.testUser})
-        self.assertEqual(json.loads(response.content.decode("utf-8")), returnData)
-    
+        self.assertJSONEqual(str(response.content, encoding='utf-8'), returnData)
+
     def testLoginLogout(self):
         '''
         This test also covers the Login Status API
