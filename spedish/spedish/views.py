@@ -41,6 +41,8 @@ class UserProfileMgr(APIView):
     def put(self, request):
         """
         Update a user profile, username, password and seller status cannot be updated here
+        
+        To insert an address, set address_id to 0
         ---
         parameters:
         - name: username

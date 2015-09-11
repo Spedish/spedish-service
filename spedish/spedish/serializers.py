@@ -1,10 +1,12 @@
 import copy
 
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
+
 from rest_framework import serializers
 
 from spedish.models import UserProfile, Address
-from django.db import transaction
 
 
 class UserAddressReadSerializer(serializers.ModelSerializer):
@@ -20,11 +22,11 @@ class UserAddressWriteSerializer(serializers.ModelSerializer):
 
 
 class UserAddressUpdateSerializer(serializers.ModelSerializer):
-    entry_id = serializers.IntegerField()
+    address_id = serializers.IntegerField()
 
     class Meta:
         model = Address
-        fields = ('entry_id', 'line_one', 'line_two', 'city', 'state', 'zip_code')
+        fields = ('address_id', 'line_one', 'line_two', 'city', 'state', 'zip_code')
 
 
 class UserAuthSerializer(serializers.ModelSerializer):
@@ -113,16 +115,27 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         userRec.save()
 
         # Update the address list
+        updatedIds = set()
         for addr in addrList:
-            addrRec = instance.address.get(id=addr.get('entry_id'))
-            if not addrRec:
+            try:
+                addrRec = instance.address.get(id=addr.get('address_id'))
+                self._setFields(addrRec, addr, [])
+                addrRec.save()
+            except ObjectDoesNotExist:
                 # insert a new address if the entry currently does not exist
-                del addr['entry_id']
+                del addr['address_id']
                 addrRec = Address(user=instance, **addr)
                 addrRec.save()
+            finally:
+                # Keep track of which IDs we operated on, these are the active
+                # IDs that we either updated or added
+                updatedIds.add(addrRec.id)
 
-            self._setFields(addrRec, addr, [])
-            addrRec.save()
+        # Delete entries that are no longer present
+        allIds = set([record.id for record in instance.address.all()])
+        for deleteId in allIds.difference(updatedIds):
+            addrRec = instance.address.get(id=deleteId)
+            addrRec.delete()
 
         # Update UserProfile
         # TODO: There are no other fields so nothing is written
