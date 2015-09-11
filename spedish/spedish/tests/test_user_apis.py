@@ -7,11 +7,9 @@ Created on Sep 8, 2015
 '''
 
 from copy import deepcopy
-import json
 
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.test import SimpleTestCase
 from rest_framework import status
 from rest_framework.test import APITestCase 
 
@@ -34,6 +32,7 @@ class UserAPITests(APITestCase):
             'isSeller': True,
             'address': [
                 {
+                    'id': 1,
                     'line_one': '11731 SE 65th St',
                     'line_two': '',
                     'city': 'Bellevue',
@@ -41,6 +40,7 @@ class UserAPITests(APITestCase):
                     'zip_code': '98006'
                 },
                 {
+                    'id': 2,
                     'line_one': '925 Weyburn Pl',
                     'line_two': '',
                     'city': 'Los Angeles',

@@ -10,7 +10,7 @@ from django.db import transaction
 class UserAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ('line_one', 'line_two', 'city', 'state', 'zip_code')
+        fields = ('id', 'line_one', 'line_two', 'city', 'state', 'zip_code')
 
 
 class UserAuthSerializer(serializers.ModelSerializer):
