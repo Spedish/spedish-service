@@ -135,8 +135,6 @@ class UserAPITests(APITestCase):
         slotId = putData['address'][0]['id']
         putData['address'][0] = deepcopy(self.extraAddress1)
         putData['address'][0]['id'] = slotId
-        putData['address'][1]['id'] = putData['address'][1]['id']
-        del putData['address'][1]['id']
         
         # Return data does not contain password and has id field for address
         returnData = deepcopy(userInfo)
