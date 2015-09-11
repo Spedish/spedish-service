@@ -22,11 +22,11 @@ class UserAddressWriteSerializer(serializers.ModelSerializer):
 
 
 class UserAddressUpdateSerializer(serializers.ModelSerializer):
-    address_id = serializers.IntegerField()
+    id = serializers.IntegerField()
 
     class Meta:
         model = Address
-        fields = ('address_id', 'line_one', 'line_two', 'city', 'state', 'zip_code')
+        fields = ('id', 'line_one', 'line_two', 'city', 'state', 'zip_code')
 
 
 class UserAuthSerializer(serializers.ModelSerializer):
@@ -118,12 +118,12 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         updatedIds = set()
         for addr in addrList:
             try:
-                addrRec = instance.address.get(id=addr.get('address_id'))
+                addrRec = instance.address.get(id=addr.get('id'))
                 self._setFields(addrRec, addr, [])
                 addrRec.save()
             except ObjectDoesNotExist:
                 # insert a new address if the entry currently does not exist
-                del addr['address_id']
+                del addr['id']
                 addrRec = Address(user=instance, **addr)
                 addrRec.save()
             finally:

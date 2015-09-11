@@ -134,8 +134,8 @@ class UserAPITests(APITestCase):
         # Replace address entry for 1 and setup id for 1 and 2
         slotId = putData['address'][0]['id']
         putData['address'][0] = deepcopy(self.extraAddress1)
-        putData['address'][0]['address_id'] = slotId
-        putData['address'][1]['address_id'] = putData['address'][1]['id']
+        putData['address'][0]['id'] = slotId
+        putData['address'][1]['id'] = putData['address'][1]['id']
         del putData['address'][1]['id']
         
         # Return data does not contain password and has id field for address
@@ -152,8 +152,8 @@ class UserAPITests(APITestCase):
         # Add 2 additional addresses (extraAddress1 and 2)
         putData['address'].append(deepcopy(self.extraAddress1))
         putData['address'].append(deepcopy(self.extraAddress2))
-        putData['address'][2]['address_id'] = 0
-        putData['address'][3]['address_id'] = 0
+        putData['address'][2]['id'] = 0
+        putData['address'][3]['id'] = 0
         
         returnData['address'].append(deepcopy(self.extraAddress1))
         returnData['address'].append(deepcopy(self.extraAddress2))
@@ -168,9 +168,9 @@ class UserAPITests(APITestCase):
         response = self.client.get(url, data={'username': self.testUser})
         self.assertJSONEqual(str(response.content, encoding='utf-8'), returnData)
         
-        # Delete address with address_id 2
+        # Delete address with id 2
         for i in range(0,4):
-            putData['address'][i]['address_id'] = returnData['address'][i]['id']
+            putData['address'][i]['id'] = returnData['address'][i]['id']
             
         del putData['address'][1]
         del returnData['address'][1]
