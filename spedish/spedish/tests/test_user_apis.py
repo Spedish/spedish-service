@@ -73,6 +73,21 @@ class UserAPITests(APITestCase):
             self._testCreateUser()
             self.isSetup = True
             
+    def tearDown(self):
+        self._logout()
+    
+    def _login(self):
+        url = reverse('user-auth-api')
+        
+        response = self.client.post(url, {'username': self.testUser, 'password': self.testPass})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+    def _logout(self):
+        url = reverse('user-auth-api')
+        
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+                
     def _testCreateUser(self):
         # delete the test user if it exists
         try:
@@ -105,15 +120,15 @@ class UserAPITests(APITestCase):
         returnData = deepcopy(self.data)
         returnData['user'].pop('password')
         
-        # Bad request, no username
+        # Bad request, not logged in
+        self._logout()
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         
-        # Bad request, user not found
-        response = self.client.get(url, data={'username': 'blah'})
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self._login()
         
-        response = self.client.get(url, data={'username': self.testUser})
+        # Get the user info
+        response = self.client.get(url)
         # We don't care about the insert IDs
         responseObj = json.loads(str(response.content, encoding='utf-8'))
         del responseObj['address'][0]['id']
@@ -121,8 +136,10 @@ class UserAPITests(APITestCase):
         self.assertJSONEqual(json.dumps(responseObj), returnData)
         
         return json.loads(str(response.content, encoding='utf-8'))
-        
+    
     def testUpdateUserInfo(self):
+        self._login()
+        
         url = reverse('user-profile-api')
         
         # Since the ids etc are not deterministic, we will utilize GetUserInfo
@@ -141,7 +158,7 @@ class UserAPITests(APITestCase):
         returnData['address'][0] = deepcopy(self.extraAddress1)
         returnData['address'][0]['id'] = slotId
         
-        response = self.client.put(url + '?username=%s' % self.testUser, putData, format='json')
+        response = self.client.put(url, putData, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         response = self.client.get(url, data={'username': self.testUser})
@@ -160,7 +177,7 @@ class UserAPITests(APITestCase):
         returnData['address'][2]['id'] = slotId + 2
         returnData['address'][3]['id'] = slotId + 3
         
-        response = self.client.put(url + '?username=%s' % self.testUser, putData, format='json')
+        response = self.client.put(url, putData, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         response = self.client.get(url, data={'username': self.testUser})
@@ -173,7 +190,7 @@ class UserAPITests(APITestCase):
         del putData['address'][1]
         del returnData['address'][1]
         
-        response = self.client.put(url + '?username=%s' % self.testUser, putData, format='json')
+        response = self.client.put(url, putData, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         response = self.client.get(url, data={'username': self.testUser})
@@ -185,9 +202,7 @@ class UserAPITests(APITestCase):
         '''
         url = reverse('user-auth-api')
         
-        # Call logout once to make sure we are logged out
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self._logout()
         
         # Check that we are currently not logged in
         response = self.client.get(url)
@@ -197,17 +212,13 @@ class UserAPITests(APITestCase):
         response = self.client.post(url, {'username': self.testUser, 'password': 'abcd'})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         
-        # Attempt good login
-        response = self.client.post(url, {'username': self.testUser, 'password': self.testPass})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self._login()
         
         # Check we are now logged in 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-        # Call logout once to make sure we are logged out
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self._logout()
         
         # Check that we are currently not logged in
         response = self.client.get(url)
