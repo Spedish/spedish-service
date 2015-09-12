@@ -1,13 +1,12 @@
 from django.contrib.auth import logout, authenticate, login
 from django.core.exceptions import ObjectDoesNotExist
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from spedish.models import UserProfile
 from spedish.serializers import UserProfileWriteSerializer, \
-    UserProfileReadSerializer
+    UserProfileReadSerializer, UserProfileUpdateSerializer
 
 
 class UserProfileMgr(APIView):
@@ -35,6 +34,39 @@ class UserProfileMgr(APIView):
             if inputSerializer.is_valid(raise_exception = True):
                 inputSerializer.save()
                 return Response(None, status.HTTP_201_CREATED)
+
+        except:
+            return Response(None, status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        """
+        Update a user profile, username, password and seller status cannot be updated here
+        
+        To insert an address, set id to 0
+        ---
+        parameters:
+        - name: username
+          description: which user to update
+          type: string
+          paramType: query
+          required: true
+        - name: profileData
+          pytype: UserProfileUpdateSerializer
+          paramType: body
+
+        responseMessages:
+            - code: 200
+              message: Successfully updated
+            - code: 400
+              message: Invalid request data
+        """
+        try:
+            user = UserProfile.objects.get(user__username=request.GET['username'])
+
+            inputSerializer = UserProfileUpdateSerializer(instance=user, data = request.data)
+            if inputSerializer.is_valid(raise_exception = True):
+                inputSerializer.save()
+                return Response(None, status.HTTP_200_OK)
 
         except:
             return Response(None, status.HTTP_400_BAD_REQUEST)
