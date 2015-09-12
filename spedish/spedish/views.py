@@ -1,6 +1,8 @@
 from django.contrib.auth import logout, authenticate, login
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,6 +15,15 @@ class UserProfileMgr(APIView):
     """
     User profile management
     """
+
+    # This endpoint requires a valid user
+    authentication_classes = ([SessionAuthentication])
+    permission_classes = ([IsAuthenticated])
+
+    def get_permissions(self):
+        # allow non-authenticated user to create via POST
+        return ([AllowAny()] if self.request.method == 'POST'
+            else [IsAuthenticated()])
 
     def post(self, request):
         """
@@ -45,11 +56,6 @@ class UserProfileMgr(APIView):
         To insert an address, set id to 0
         ---
         parameters:
-        - name: username
-          description: which user to update
-          type: string
-          paramType: query
-          required: true
         - name: profileData
           pytype: UserProfileUpdateSerializer
           paramType: body
@@ -61,7 +67,8 @@ class UserProfileMgr(APIView):
               message: Invalid request data
         """
         try:
-            user = UserProfile.objects.get(user__username=request.GET['username'])
+            # At this point the rest endpoint ensure we are logged in
+            user = UserProfile.objects.get(user__username=request.user.username)
 
             inputSerializer = UserProfileUpdateSerializer(instance=user, data = request.data)
             if inputSerializer.is_valid(raise_exception = True):
@@ -92,17 +99,14 @@ class UserProfileMgr(APIView):
               message: User not found
         """
         try:
-            # use the profile serializer to get the username
-            username = request.GET['username']
+            # Use the profile serializer to get the username
+            # Endpoint guarantees there is a logged in user
+            profile = UserProfile.objects.get(user__username = request.user.username)
 
-            try:
-                profile = UserProfile.objects.get(user__username = username)
+            return Response(UserProfileReadSerializer(profile).data, status.HTTP_200_OK)
 
-                return Response(UserProfileReadSerializer(profile).data, status.HTTP_200_OK)
-
-            except ObjectDoesNotExist:
-                return Response(None, status.HTTP_404_NOT_FOUND)
-
+        except ObjectDoesNotExist:
+            return Response(None, status.HTTP_404_NOT_FOUND)
         except:
             return Response(None, status.HTTP_400_BAD_REQUEST)
 
