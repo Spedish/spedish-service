@@ -11,13 +11,19 @@ from spedish.serializers import UserProfileWriteSerializer, \
     UserProfileReadSerializer, UserProfileUpdateSerializer
 
 
+class SessionCsrfExemptAuthentication(SessionAuthentication):
+
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
+
+
 class UserProfileMgr(APIView):
     """
     User profile management
     """
 
     # This endpoint requires a valid user
-    authentication_classes = ([SessionAuthentication])
+    authentication_classes = ([SessionCsrfExemptAuthentication])
     permission_classes = ([IsAuthenticated])
 
     def get_permissions(self):
@@ -115,6 +121,8 @@ class UserAuth(APIView):
     """
     Basic user authentication functionality
     """
+
+    authentication_classes = ([SessionCsrfExemptAuthentication])
 
     def post(self, request):
         """
