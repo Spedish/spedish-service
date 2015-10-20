@@ -6,12 +6,16 @@ Content of this repo:
 
 Coding style: https://docs.djangoproject.com/en/1.8/internals/contributing/writing-code/coding-style/
 
-Database
-MySQL
-* Create tables
+Database -MySQL
+```
+Create tables
 python3 manage.py migrate
-* When there's local change on data models
+When there's local change on data models
 python3 manage.py makemigrations
+```
 
 Django Service
+```
+Start server
 python3 manage.py runserver
+```
