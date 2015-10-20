@@ -5,3 +5,13 @@ Content of this repo:
 * spedish - Django project
 
 Coding style: https://docs.djangoproject.com/en/1.8/internals/contributing/writing-code/coding-style/
+
+Database
+MySQL
+Create tables:
+python3 manage.py migrate
+When there's local change on data models:
+python3 manage.py makemigrations
+
+Django Service
+python3 manage.py runserver
