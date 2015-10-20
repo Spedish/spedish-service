@@ -8,9 +8,9 @@ Coding style: https://docs.djangoproject.com/en/1.8/internals/contributing/writi
 
 Database
 MySQL
-Create tables:
+* Create tables
 python3 manage.py migrate
-When there's local change on data models:
+* When there's local change on data models
 python3 manage.py makemigrations
 
 Django Service
