@@ -24,7 +24,7 @@ class UserAPITests(APITestCase):
     
     testUser = 'testAccountABC'
     testPass = 'testAccountPass'
-    testEmail = 'test@test.com'
+    testEmail = 'jyxu@jamesyxu.com'
     data = {
             'user': {
                 'username': testUser,
@@ -82,11 +82,19 @@ class UserAPITests(APITestCase):
         response = self.client.post(url, {'username': self.testUser, 'password': self.testPass})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
+        # Check we are now logged in 
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
     def _logout(self):
         url = reverse('user-auth-api')
         
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Check that we are currently not logged in
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
                 
     def _testCreateUser(self):
         # delete the test user if it exists
@@ -196,6 +204,25 @@ class UserAPITests(APITestCase):
         response = self.client.get(url, data={'username': self.testUser})
         self.assertJSONEqual(str(response.content, encoding='utf-8'), returnData)
 
+    def testFBLogin(self):
+        url = reverse('fb-user-auth-api')
+        
+        self._logout()
+        
+        # Use a bad token
+        badToken = 'This token will never work'
+        response = self.client.post(url, {'token': badToken})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+        # Now ask for a good token
+        goodToken = input("Input FB access token: ")
+        response = self.client.post(url, {'token': goodToken})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Verify we are reporting logged in
+        response = self.client.get(reverse('user-auth-api'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
     def testLoginLogout(self):
         '''
         This test also covers the Login Status API
@@ -204,22 +231,10 @@ class UserAPITests(APITestCase):
         
         self._logout()
         
-        # Check that we are currently not logged in
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        
         # Attempt failed login
         response = self.client.post(url, {'username': self.testUser, 'password': 'abcd'})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         
         self._login()
         
-        # Check we are now logged in 
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
         self._logout()
-        
-        # Check that we are currently not logged in
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

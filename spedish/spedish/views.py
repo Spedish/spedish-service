@@ -159,7 +159,7 @@ class FBUserAuth(APIView):
             If the below operation fails using the token, you may need to renew it
             (by default the token is only valid for ~1hr
             """ 
-            token = 'CAAXoqw6AxAwBAGGKJDozo9LM52qnQKWUkCQWZAc2n2S32gT4WHD3NhKBVuHZBl8pzk0aBsPIznkw2X0u9i9Iv6Ppx0T0wwHpesSHwQOK3X6cT7CRFKXJGwFs7SVXcY6xlmFChEEDNuorngpf8aqpEuaWIrKXmrbmhfjCrKOfmQbjajYthScYwZABJV7Fkr8MxfhZA8AzF8pQ29HrAZBFO'            
+            #token = 'CAAXoqw6AxAwBAGGKJDozo9LM52qnQKWUkCQWZAc2n2S32gT4WHD3NhKBVuHZBl8pzk0aBsPIznkw2X0u9i9Iv6Ppx0T0wwHpesSHwQOK3X6cT7CRFKXJGwFs7SVXcY6xlmFChEEDNuorngpf8aqpEuaWIrKXmrbmhfjCrKOfmQbjajYthScYwZABJV7Fkr8MxfhZA8AzF8pQ29HrAZBFO'            
             
             # Ask FB for user email
             fb = facebook.GraphAPI(token)
