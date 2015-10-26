@@ -6,11 +6,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import facebook
+
 from spedish.models import UserProfile
 from spedish.serializers import UserProfileWriteSerializer, \
     UserProfileReadSerializer, UserProfileUpdateSerializer
-from open_facebook.api import OpenFacebook
-
+from facebook import GraphAPIError
+    
 
 class SessionCsrfExemptAuthentication(SessionAuthentication):
 
@@ -157,14 +159,13 @@ class FBUserAuth(APIView):
             If the below operation fails using the token, you may need to renew it
             (by default the token is only valid for ~1hr
             """ 
-            token = 'CAAXoqw6AxAwBAC1ZAxxZB7dGxJ0v3By8O7mmnGJNmjJSxXugNvdlhlzCJYKffuqJZAZB28DP8qWRl9yZAfBMfZC5Sj0aUcPSC4K2TQThKdLEPpHsDKvLni3ad2svzzkx9cPRlZCnEJp52iHn9xZCDazu03OpeNBbsF1cQ2ZAKAmyraCUPQfVcfutwEXHz0tx3ZBL9d9a9MP53uhuRWOfQaoHYJ'            
+            token = 'CAAXoqw6AxAwBAGGKJDozo9LM52qnQKWUkCQWZAc2n2S32gT4WHD3NhKBVuHZBl8pzk0aBsPIznkw2X0u9i9Iv6Ppx0T0wwHpesSHwQOK3X6cT7CRFKXJGwFs7SVXcY6xlmFChEEDNuorngpf8aqpEuaWIrKXmrbmhfjCrKOfmQbjajYthScYwZABJV7Fkr8MxfhZA8AzF8pQ29HrAZBFO'            
             
             # Ask FB for user email
-            fb = OpenFacebook(token)
-            if not fb.is_authenticated():
-                return Response(None, status.HTTP_401_UNAUTHORIZED)
+            fb = facebook.GraphAPI(token)
+            me = fb.get_object("me", fields='id,name,email')
             
-            me = fb.get('me', fields="id,name,email")
+            #me = fb.get('me', fields="id,name,email")
             if not me['email']:
                 return Response(None, status.HTTP_400_BAD_REQUEST)
             
@@ -177,7 +178,14 @@ class FBUserAuth(APIView):
             user = authenticate(email=profile.user.email)
             login(request, user)
             return Response(None, status.HTTP_200_OK)
-
+            
+        except GraphAPIError as e:
+            # catch the invalid login case and return a generic error for the rest 
+            if e.result['error']['code'] == 190:
+                return Response(None, status.HTTP_401_UNAUTHORIZED)
+            else:
+                return Response(None, status.HTTP_400_BAD_REQUEST)
+                
         except:
             return Response(None, status.HTTP_400_BAD_REQUEST)
         

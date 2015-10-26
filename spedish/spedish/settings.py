@@ -38,7 +38,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_facebook',
     'localflavor',
     'rest_framework',
     'rest_framework_swagger',
@@ -101,10 +100,6 @@ DATABASES = {
         'PORT': '3306',
     }
 }
-
-# For FB integration
-FACEBOOK_APP_ID = '1663196263924748'
-FACEBOOK_APP_SECRET = 'cc220ddec4c30bb0fff5b50aaa1fef06'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
