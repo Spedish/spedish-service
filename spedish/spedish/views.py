@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from spedish.models import UserProfile
 from spedish.serializers import UserProfileWriteSerializer, \
     UserProfileReadSerializer, UserProfileUpdateSerializer
+from open_facebook.api import OpenFacebook
 
 
 class SessionCsrfExemptAuthentication(SessionAuthentication):
@@ -117,9 +118,73 @@ class UserProfileMgr(APIView):
             return Response(None, status.HTTP_400_BAD_REQUEST)
 
 
+class FBUserAuth(APIView):
+    """
+    Handles user authentication through FB, only the FB login process is different
+    other operations can still be performed on the normal UserAuth interface
+    after the user has been logged in
+    """
+    
+    authentication_classes = ([SessionCsrfExemptAuthentication])
+    
+    def post(self, request):
+        """
+        Login the indicated user using a FB access token
+        ---
+        parameters:
+        - name: access_token
+          paramType: form
+          required: true
+          
+        responseMessages:
+        - code: 200
+          message: Successfully logged in
+        - code: 400
+          message: Invalid request data
+        - code: 401
+          message: Login failed
+        - code: 404
+          messaage: Token is valid however user does not exist in Spedish database
+        """
+        
+        try:
+            token = request.POST.get('token')
+            
+            """
+            For testing purposes get a test token from http://www.spedish.com/fb.html
+            and uncomment the line below
+            
+            If the below operation fails using the token, you may need to renew it
+            (by default the token is only valid for ~1hr
+            """ 
+            token = 'CAAXoqw6AxAwBAC1ZAxxZB7dGxJ0v3By8O7mmnGJNmjJSxXugNvdlhlzCJYKffuqJZAZB28DP8qWRl9yZAfBMfZC5Sj0aUcPSC4K2TQThKdLEPpHsDKvLni3ad2svzzkx9cPRlZCnEJp52iHn9xZCDazu03OpeNBbsF1cQ2ZAKAmyraCUPQfVcfutwEXHz0tx3ZBL9d9a9MP53uhuRWOfQaoHYJ'            
+            
+            # Ask FB for user email
+            fb = OpenFacebook(token)
+            if not fb.is_authenticated():
+                return Response(None, status.HTTP_401_UNAUTHORIZED)
+            
+            me = fb.get('me', fields="id,name,email")
+            if not me['email']:
+                return Response(None, status.HTTP_400_BAD_REQUEST)
+            
+            # Get Spedish user through the email address
+            profile = UserProfile.objects.get(user__email = me['email']) 
+            if not profile:
+                return Response(None, status.HTTP_404_NOT_FOUND)
+            
+            # Login the user
+            user = authenticate(email=profile.user.email)
+            login(request, user)
+            return Response(None, status.HTTP_200_OK)
+
+        except:
+            return Response(None, status.HTTP_400_BAD_REQUEST)
+        
+
 class UserAuth(APIView):
     """
-    Basic user authentication functionality
+    User authentication functionality
     """
 
     authentication_classes = ([SessionCsrfExemptAuthentication])
