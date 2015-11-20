@@ -5,10 +5,10 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from spedish.models import UserProfile
 from spedish.serializers import UserProfileWriteSerializer, \
-    UserProfileReadSerializer, UserProfileUpdateSerializer
+    UserProfileReadSerializer, UserProfileUpdateSerializer, \
+    ProductProfileWriteSerializer
 
 
 class SessionCsrfExemptAuthentication(SessionAuthentication):
@@ -184,3 +184,39 @@ class UserAuth(APIView):
         """
         logout(request)
         return Response(None, 200)
+    
+class ProductProfileMgr(APIView):
+    """
+    Product profile management
+    """
+    
+    def post(self, request):
+        """
+        Post a product
+        
+        I can't figure out how to make Swagger work with file uploading.
+        Instead, I use curl (http://curl.haxx.se/) to test the API:
+        curl -F "name=test" -F "product_image=@C:\Test.JPG" localhost:8000/product-profile/
+        ---
+        parameters:
+        - name: Name
+          type: string
+          paramType: form
+          required: true
+          
+        - name: Product Image
+          type: File
+          paramType: form
+          required: true
+        
+        responseMessages:
+        - code: 201
+          message: Successfully created
+        - code: 400
+          message: Invalid request data
+        """
+        serializer = ProductProfileWriteSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status.HTTP_201_CREATED)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)

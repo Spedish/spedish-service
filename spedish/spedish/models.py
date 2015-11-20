@@ -23,3 +23,10 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     isSeller = models.BooleanField()
 
+class ProductProfile(models.Model):
+    """
+    This model holds everything about a product (meal)
+    """
+    product_image = models.ImageField(upload_to='pic')
+    name = models.CharField(max_length=100)
+
