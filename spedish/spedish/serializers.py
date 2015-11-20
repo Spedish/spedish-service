@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework import serializers
 
-from spedish.models import UserProfile, Address
+from spedish.models import UserProfile, Address, ProductProfile
 
 
 class UserAddressReadSerializer(serializers.ModelSerializer):
@@ -145,5 +145,10 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         for attr, val in data.items():
             if attr not in ignoreField:
                 setattr(instance, attr, val)
+                
 
+class ProductProfileWriteSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ProductProfile
 

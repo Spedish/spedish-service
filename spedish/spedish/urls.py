@@ -32,4 +32,5 @@ urlpatterns = [
     url(r'^', include(router.urls)),                                    # Hook up the endpoints from the router
     url(r'^auth/$', views.UserAuth.as_view(), name='user-auth-api'),
     url(r'^user-profile/$', views.UserProfileMgr.as_view(), name='user-profile-api'),
+    url(r'^product-profile/$', views.ProductProfileMgr.as_view(), name='product-profile-api'),
 ]
